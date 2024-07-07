@@ -18,6 +18,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,10 +34,24 @@ import com.example.addtext.ui.theme.AddTextTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        val listOfStrings = sharedPreferences.getStringSet("items", setOf())?.toMutableSet()
+
+
+
         setContent {
             val list = remember {mutableStateListOf<String>()}
             var text by remember { mutableStateOf("") }
             val listIndex = list.size - 1
+            LaunchedEffect(key1 = this) {
+                listOfStrings?.forEach{
+                    list.add(it)
+                }
+            }
+
+
 
             AddTextTheme {
                 // A surface container using the 'background' color from the theme
@@ -45,9 +60,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.primary
 
                 ) {
-                    Column(Modifier
-                        .padding(50.dp)
-                        .fillMaxWidth(),
+                    Column(
+                        Modifier
+                            .padding(50.dp)
+                            .fillMaxWidth(),
 
                         horizontalAlignment = Alignment.CenterHorizontally
 
@@ -65,6 +81,9 @@ class MainActivity : ComponentActivity() {
 
                             MainButton( onClick = {
                                 list.add(text)
+                                listOfStrings?.add(text)
+                                editor.putStringSet("items", listOfStrings)
+                                editor.apply()
                             })
 
                             RemoveButton(
@@ -78,6 +97,7 @@ class MainActivity : ComponentActivity() {
                             LazyColumn {
                                 items(list){
                                     Text(it)
+
 
                                 }
                             }
